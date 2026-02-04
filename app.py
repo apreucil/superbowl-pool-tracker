@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import csv
 import requests
@@ -107,29 +107,49 @@ def get_quarter(score_data):
         return score_data['period']
     return 0
 
+# Load pool data at import so WSGI servers (gunicorn) have it available
+load_pool_data()
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/api/score')
 def api_score():
-    """Return current score and winners"""
-    score = get_live_score()
-    
+    """Return current score and winners. Supports optional mock query param: ?mock=7-1"""
+    # Allow manual/mock override via query string for testing: ?mock=SEAHawks-PATRIOTS
+    mock = request.args.get('mock')
+    if mock:
+        try:
+            s, p = map(int, mock.split('-'))
+            score = {
+                'seahawks': s,
+                'patriots': p,
+                'status': 'Mock'
+            }
+        except Exception:
+            return jsonify({'error': 'mock must be in format X-Y (e.g. ?mock=7-1)'}), 400
+    else:
+        score = get_live_score()
+
     if not score:
         return jsonify({
-            'error': 'Could not fetch score',
+            'status': 'waiting',
+            'message': 'Could not fetch score or game not found',
             'current_winners': [],
-            'seahawks': 0,
-            'patriots': 0
-        }), 404
-    
+            'seahawks': None,
+            'patriots': None,
+            'timestamp': datetime.now().isoformat(),
+            'quarterly_winners': quarterly_winners
+        }), 200
+
     seahawks = score.get('seahawks', 0)
     patriots = score.get('patriots', 0)
-    
+
     winners = calculate_winners(seahawks, patriots)
-    
+
     return jsonify({
+        'status': score.get('status', 'live'),
         'seahawks': seahawks,
         'patriots': patriots,
         'seahawks_last_digit': seahawks % 10,
