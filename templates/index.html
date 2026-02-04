@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Bowl Pool 2026 - Live Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .score-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .team-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .team-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1e3c72;
+        }
+
+        .score {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #2a5298;
+            margin: 15px 0;
+        }
+
+        .last-digit {
+            font-size: 1.2em;
+            color: #666;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #eee;
+        }
+
+        .winners-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .winners-section h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .current-winner {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quarterly-winners {
+            margin-top: 20px;
+        }
+
+        .quarterly-winners h3 {
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+
+        .quarters-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .quarter {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .quarter-label {
+            font-weight: bold;
+            color: #2a5298;
+            font-size: 0.9em;
+        }
+
+        .quarter-winner {
+            color: #333;
+            margin-top: 5px;
+            font-size: 0.95em;
+        }
+
+        .players-list {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .players-list h2 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .player-card {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 0.85em;
+        }
+
+        .player-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .player-numbers {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .update-time {
+            text-align: center;
+            color: white;
+            font-size: 0.85em;
+            margin-top: 15px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .score {
+                font-size: 2.5em;
+            }
+
+            .player-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .quarters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏈 Super Bowl Pool 2026</h1>
+            <p>Live Score Tracker - Updates Every 30 Seconds</p>
+        </header>
+
+        <div id="error-container"></div>
+
+        <div class="score-board">
+            <div class="team-card">
+                <div class="team-name">🦅 Seahawks</div>
+                <div class="score" id="seahawks-score">--</div>
+                <div class="last-digit">Last Digit: <span id="seahawks-digit">-</span></div>
+            </div>
+            <div class="team-card">
+                <div class="team-name">🏈 Patriots</div>
+                <div class="score" id="patriots-score">--</div>
+                <div class="last-digit">Last Digit: <span id="patriots-digit">-</span></div>
+            </div>
+        </div>
+
+        <div class="winners-section">
+            <h2>🏆 Current Pool Winner(s)</h2>
+            <div class="current-winner" id="current-winner">
+                Waiting for score...
+            </div>
+
+            <div class="quarterly-winners">
+                <h3>📊 Quarterly Winners</h3>
+                <div class="quarters-grid">
+                    <div class="quarter">
+                        <div class="quarter-label">Q1 Winner:</div>
+                        <div class="quarter-winner" id="q1-winner">-</div>
+                    </div>
+                    <div class="quarter">
+                        <div class="quarter-label">Q2 Winner:</div>
+                        <div class="quarter-winner" id="q2-winner">-</div>
+                    </div>
+                    <div class="quarter">
+                        <div class="quarter-label">Q3 Winner:</div>
+                        <div class="quarter-winner" id="q3-winner">-</div>
+                    </div>
+                    <div class="quarter">
+                        <div class="quarter-label">Q4 Winner:</div>
+                        <div class="quarter-winner" id="q4-winner">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="players-list">
+            <h2>📋 All Players & Numbers</h2>
+            <div class="player-grid" id="players-grid">
+                <div class="loading">Loading players...</div>
+            </div>
+        </div>
+
+        <div class="update-time">
+            Last updated: <span id="update-time">--:-- --</span>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function updateScore() {
+            try {
+                const response = await fetch(`${API_BASE}/api/score`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('seahawks-score').textContent = data.seahawks;
+                    document.getElementById('patriots-score').textContent = data.patriots;
+                    document.getElementById('seahawks-digit').textContent = data.seahawks_last_digit;
+                    document.getElementById('patriots-digit').textContent = data.patriots_last_digit;
+
+                    // Update current winners
+                    const winnerElement = document.getElementById('current-winner');
+                    if (data.current_winners.length > 0) {
+                        winnerElement.textContent = '🎉 ' + data.current_winners.join(', ') + ' 🎉';
+                    } else {
+                        winnerElement.textContent = 'No match yet...';
+                    }
+
+                    // Update quarterly winners
+                    if (data.quarterly_winners) {
+                        document.getElementById('q1-winner').textContent = data.quarterly_winners.Q1 || '-';
+                        document.getElementById('q2-winner').textContent = data.quarterly_winners.Q2 || '-';
+                        document.getElementById('q3-winner').textContent = data.quarterly_winners.Q3 || '-';
+                        document.getElementById('q4-winner').textContent = data.quarterly_winners.Q4 || '-';
+                    }
+
+                    // Update time
+                    const time = new Date(data.timestamp);
+                    document.getElementById('update-time').textContent = time.toLocaleTimeString();
+
+                    // Clear any errors
+                    document.getElementById('error-container').innerHTML = '';
+                } else {
+                    showError(data.error || 'Failed to fetch score');
+                }
+            } catch (error) {
+                showError('Error updating score: ' + error.message);
+            }
+        }
+
+        async function loadPlayers() {
+            try {
+                const response = await fetch(`${API_BASE}/api/all-players`);
+                const players = await response.json();
+
+                const grid = document.getElementById('players-grid');
+                grid.innerHTML = '';
+
+                players.forEach(player => {
+                    const card = document.createElement('div');
+                    card.className = 'player-card';
+                    card.innerHTML = `
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-numbers">🦅 ${player.seahawks} / 🏈 ${player.patriots}</div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading players:', error);
+            }
+        }
+
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Initial load
+        loadPlayers();
+        updateScore();
+
+        // Update every 30 seconds
+        setInterval(updateScore, 30000);
+    </script>
+</body>
+</html>
